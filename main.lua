@@ -7,10 +7,24 @@ local game ={
         menu = true,
         paused = false,
         running = false,
-    ended = false
+        ended = false
     },
     points = 0,
     levels = {15, 30, 60, 120}
+}
+local fonts = {
+    medium = {
+        font = love.graphics.newFont(16),
+        size = 16
+    },
+    large = {
+        font = love.graphics.newFont(24),
+        size = 24
+    },
+    maive = {
+        font = love.graphics.newFont(60),
+        size = 60
+    }
 }
 local player = {
     radius = 20,
@@ -18,7 +32,8 @@ local player = {
     y = 30
 }
 local buttons = {
-    menu_state = {}
+    menu_state = {},
+    ended_state = {}
 }
 local enemies = {}
 local function changeGameState(state)
@@ -41,6 +56,9 @@ love.mouse.setVisible(false)
 buttons.menu_state.play_game = button("Play Game", startNewGame, nil, 120, 40)
 buttons.menu_state.settings = button("Options (TBA)", nil, nil, 120, 40)
 buttons.menu_state.exit_game = button("Exit Game", love.event.quit, nil, 120, 40)
+buttons.ended_state.replay_game = button("Replay?", startNewGame, nil, 120, 40)
+buttons.ended_state.menu = button("Menu", changeGameState, "menu", 120, 40)
+buttons.ended_state.exit_game = button("Exit Game", love.event.quit, nil, 120, 40)
 function love.mousepressed(x, y, button, istouch, presses)
     if not game.state["running"] then
     if button == 1 then
@@ -67,7 +85,7 @@ for i = 1, #enemies do
             end
         end
     else
-        changeGameState("menu")
+        changeGameState("ended")
         love.window.setMode(150, 200)
     end
 end
@@ -75,9 +93,10 @@ game.points = game.points + dt
 end
 end
 function love.draw()
+    love.graphics.setFont(fonts.medium.font)
     love.graphics.print("FPS: " .. love.timer.getFPS(), love.graphics.newFont(16), 10, love.graphics.getHeight() - 30)
     if game.state["running"]then
-        love.graphics.printf(math.floor(game.points), love.graphics.newFont(24), 0, 10, love.graphics.getWidth(),
+        love.graphics.printf("Points: " .. math.floor(game.points), love.graphics.newFont(24), 0, 10, love.graphics.getWidth(),
     "center")
         for i = 1, #enemies do
             enemies[i]:draw()
@@ -87,7 +106,11 @@ function love.draw()
         buttons.menu_state.play_game:draw(10, 20, 17, 10)
         buttons.menu_state.settings:draw(10, 70, 17, 10)
         buttons.menu_state.exit_game:draw(10, 120, 17, 10)
-    end
+elseif game.state["ended"] then
+    buttons.ended_state.replay_game:draw(10, 20, 17, 10)
+    buttons.ended_state.menu:draw(10, 70, 17, 10)
+    buttons.ended_state.exit_game:draw(10, 120, 17, 10)
+end
     if not game.state["running"] then
         love.graphics.circle("fill", player.x, player.y, player.radius / 2)
     end
